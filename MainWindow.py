@@ -29,6 +29,7 @@ class MainWindow( QWidget ):
 
 		self.offset_input = QSpinBox()
 		self.offset_input.setRange( 0, 1000 * 60 * 60 )
+		self.offset_input.setValue( 5000 )
 
 		self.layout.addWidget( self.offset_input )
 		self.layout.addWidget( self.select_audio )
@@ -41,7 +42,7 @@ class MainWindow( QWidget ):
 		self.replay_window = ReplayWindow()
 		self.replay_window.showMaximized()
 
-		self.offset_result = None
+		self.time_result = None
 
 	def start_recording( self ):
 		self.current_video_file = shortuuid.uuid()
@@ -76,7 +77,9 @@ class MainWindow( QWidget ):
 		self.stop_recording()
 
 	def on_show_replay( self ):
-		path = QFileInfo( f"{self.current_video_file}.avi" ).absoluteFilePath()
+		path = QFileInfo( f"{self.current_video_file}_final.avi" ).absoluteFilePath()
+		self.replay_window.time_result = self.time_result
+		self.replay_window.offset_defined = self.offset_input.value()
 		self.replay_window.v_player.setMedia( QMediaContent( QUrl.fromLocalFile( path ) ) )
 		self.replay_window.a_player.play()
 		self.replay_window.v_player.play()
@@ -97,6 +100,5 @@ class MainWindow( QWidget ):
 			message = self.serial.readLine().data().decode()
 			message = message.rstrip( '\r\n' )
 
-		winner = int( message )
 		time = self.replay_window.a_player.position()
-		self.offset_result = self.offset_input.value() - time
+		self.time_result = time

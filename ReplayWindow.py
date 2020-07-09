@@ -10,6 +10,9 @@ class ReplayWindow( QWidget ):
 
 		self.setStyleSheet( "background-color:black;" )
 
+		self.offset_defined = None
+		self.time_result = None
+
 		self.layout = QVBoxLayout()
 		self.video_w = QVideoWidget()
 		self.timer_label = self.make_label()
@@ -29,13 +32,26 @@ class ReplayWindow( QWidget ):
 
 	@staticmethod
 	def format_millis( millis: int ) -> str:
-		minutes = int( millis / (60 * 1000) )
-		seconds = int( (millis % (60 * 1000)) / 1000 )
-		ms = millis % 1000
-		return f"{minutes:02}:{seconds:02}:{ms:03}"
+		if millis >= 0:
+			minutes = int( millis / (60 * 1000) )
+			seconds = int( (millis % (60 * 1000)) / 1000 )
+			ms = millis % 1000
+			return f"{minutes:02}:{seconds:02}:{ms:03}"
+		else:
+			millis = -millis
+			minutes = int( millis / (60 * 1000) )
+			seconds = int( (millis % (60 * 1000)) / 1000 )
+			ms = millis % 1000
+			return f"-{minutes:02}:{seconds:02}:{ms:03}"
 
 	def update_time_label( self ):
-		self.timer_label.setText( self.format_millis( self.v_player.position() ) )
+		position = self.v_player.position()
+		if position > self.time_result:
+			text = self.format_millis( self.time_result - self.offset_defined )
+		else:
+			text = self.format_millis( position - self.offset_defined )
+
+		self.timer_label.setText( text )
 
 	def make_label( self ):
 		timer_label = QLabel()
