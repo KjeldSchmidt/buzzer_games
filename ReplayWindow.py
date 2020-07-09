@@ -45,6 +45,9 @@ class ReplayWindow( QWidget ):
 			return f"-{minutes:02}:{seconds:02}:{ms:03}"
 
 	def update_time_label( self ):
+		if self.time_result is None:
+			return
+		
 		position = self.v_player.position()
 		if position > self.time_result:
 			text = self.format_millis( self.time_result - self.offset_defined )
