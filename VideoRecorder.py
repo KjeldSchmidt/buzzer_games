@@ -30,7 +30,6 @@ import os
 #
 ########################
 
-
 class VideoRecorder:
 
 	# Video class based on openCV
@@ -163,7 +162,11 @@ class AudioRecorder:
 		return device_index
 
 
-def start_AVrecording( filename ):
+video_thread: VideoRecorder
+audio_thread: AudioRecorder
+
+
+def start_av_recording( filename ):
 	global video_thread
 	global audio_thread
 
@@ -194,7 +197,7 @@ def start_audio_recording( filename ):
 	return filename
 
 
-def stop_AVrecording( filename ):
+def stop_av_recording( filename ):
 	audio_thread.stop()
 	frame_counts = video_thread.frame_counts
 	elapsed_time = time.time() - video_thread.start_time
