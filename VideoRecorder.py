@@ -126,8 +126,6 @@ class AudioRecorder:
 		while self.open:
 			data = self.stream.read( self.frames_per_buffer )
 			self.audio_frames.append( data )
-			if not self.open:  # Is this line necessary? Might have to do something with audio timing, but seems rather pointless
-				break
 
 	# Finishes the audio recording therefore the thread too
 	def stop( self ):
@@ -139,14 +137,11 @@ class AudioRecorder:
 		self.stream.close()
 		self.audio.terminate()
 
-		wave_file = wave.open( self.audio_filename, 'wb' )
-		wave_file.setnchannels( self.channels )
-		wave_file.setsampwidth( self.audio.get_sample_size( self.format ) )
-		wave_file.setframerate( self.rate )
-		wave_file.writeframes( b''.join( self.audio_frames ) )
-		wave_file.close()
-
-		pass
+		with wave.open( self.audio_filename, 'wb' ) as wave_file:
+			wave_file.setnchannels( self.channels )
+			wave_file.setsampwidth( self.audio.get_sample_size( self.format ) )
+			wave_file.setframerate( self.rate )
+			wave_file.writeframes( b''.join( self.audio_frames ) )
 
 	# Launches the audio recording function using a thread
 	def start( self ):
@@ -169,6 +164,8 @@ audio_thread: AudioRecorder
 def start_av_recording( filename ):
 	global video_thread
 	global audio_thread
+
+	filename = f"recordings/{filename}"
 
 	video_thread = VideoRecorder( filename )
 	audio_thread = AudioRecorder( filename )
@@ -198,6 +195,7 @@ def start_audio_recording( filename ):
 
 
 def stop_av_recording( filename ):
+	filename = f"recordings/{filename}"
 	audio_thread.stop()
 	frame_counts = video_thread.frame_counts
 	elapsed_time = time.time() - video_thread.start_time
@@ -218,18 +216,6 @@ def stop_av_recording( filename ):
 		print( "Re-encoding" )
 		cmd = "ffmpeg -r " + str( recorded_fps ) + f" -i {filename}.avi -pix_fmt yuv420p -r 6 {filename}2.avi"
 		subprocess.call( cmd, shell=True )
-
-		print( "Muxing" )
-		cmd = f"ffmpeg -ac 2 -channel_layout stereo -i {filename}.wav -i {filename}2.avi -pix_fmt yuv420p {filename}_final.avi"
-		subprocess.call( cmd, shell=True )
-
-	else:
-
-		print( "Normal recording\nMuxing" )
-		cmd = f"ffmpeg -ac 2 -channel_layout stereo -i {filename}.wav -i {filename}.avi -pix_fmt yuv420p {filename}_final.avi"
-		subprocess.call( cmd, shell=True )
-
-		print( ".." )
 
 	# file_manager( filename )
 	pass

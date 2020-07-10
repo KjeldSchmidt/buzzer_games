@@ -46,10 +46,10 @@ class MainWindow( QWidget ):
 
 	def start_recording( self ):
 		self.current_video_file = shortuuid.uuid()
-		vc.start_AVrecording( self.current_video_file )
+		vc.start_av_recording( self.current_video_file )
 
 	def stop_recording( self ):
-		vc.stop_AVrecording( self.current_video_file )
+		vc.stop_av_recording( self.current_video_file )
 
 	def on_select_play( self ):
 		def handler():
