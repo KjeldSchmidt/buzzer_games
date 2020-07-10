@@ -8,26 +8,26 @@ import os
 
 
 ########################
-## JRF
-## VideoRecorder and AudioRecorder are two classes based on openCV and pyaudio, respectively.
-## By using multithreading these two classes allow to record simultaneously video and audio.
-## ffmpeg is used for muxing the two signals
-## A timer loop is used to control the frame rate of the video recording. This timer as well as
-## the final encoding rate can be adjusted according to camera capabilities
-##
+# JRF
+# VideoRecorder and AudioRecorder are two classes based on openCV and pyaudio, respectively.
+# By using multithreading these two classes allow to record simultaneously video and audio.
+# ffmpeg is used for muxing the two signals
+# A timer loop is used to control the frame rate of the video recording. This timer as well as
+# the final encoding rate can be adjusted according to camera capabilities
+########################
 
 ########################
-## Usage:
-##
-## numpy, PyAudio and Wave need to be installed
-## install openCV, make sure the file cv2.pyd is located in the same folder as the other libraries
-## install ffmpeg and make sure the ffmpeg .exe is in the working directory
-##
-##
-## start_AVrecording(filename) # function to start the recording
-## stop_AVrecording(filename)  # "" ... to stop it
-##
-##
+# Usage:
+#
+# numpy, PyAudio and Wave need to be installed
+# install openCV, make sure the file cv2.pyd is located in the same folder as the other libraries
+# install ffmpeg and make sure the ffmpeg .exe is in the working directory
+#
+#
+# start_AVrecording(filename) # function to start the recording
+# stop_AVrecording(filename)  # "" ... to stop it
+#
+#
 ########################
 
 
@@ -51,27 +51,27 @@ class VideoRecorder:
 	# Video starts being recorded
 	def record( self ):
 
-		#		counter = 1
-		timer_start = time.time()
-		timer_current = 0
+		# counter = 1
+		# timer_start = time.time()
+		# timer_current = 0
 
-		while self.open == True:
+		while self.open:
 			ret, video_frame = self.video_cap.read()
-			if ret == True:
+			if ret:
 
 				self.video_out.write( video_frame )
-				#					print str(counter) + " " + str(self.frame_counts) + " frames written " + str(timer_current)
+				# print str(counter) + " " + str(self.frame_counts) + " frames written " + str(timer_current)
 				self.frame_counts += 1
-				#					counter += 1
-				#					timer_current = time.time() - timer_start
+				# counter += 1
+				# timer_current = time.time() - timer_start
 				time.sleep( 0.16 )
 
 			# Uncomment the following three lines to make the video to be
 			# displayed to screen while recording
 
-			#					gray = cv2.cvtColor(video_frame, cv2.COLOR_BGR2GRAY)
-			#					cv2.imshow('video_frame', gray)
-			#					cv2.waitKey(1)
+			# gray = cv2.cvtColor(video_frame, cv2.COLOR_BGR2GRAY)
+			# cv2.imshow('video_frame', gray)
+			# cv2.waitKey(1)
 			else:
 				break
 
@@ -101,6 +101,8 @@ class AudioRecorder:
 
 	# Audio class based on pyAudio and Wave
 	def __init__( self, filename ):
+		self.audio = pyaudio.PyAudio()
+		self.device_index = self.find_device_index()
 
 		self.open = True
 		self.rate = 44100
@@ -108,13 +110,13 @@ class AudioRecorder:
 		self.channels = 2
 		self.format = pyaudio.paInt16
 		self.audio_filename = f"{filename}.wav"
-		self.audio = pyaudio.PyAudio()
 		self.stream = self.audio.open(
 			format=self.format,
 			channels=self.channels,
 			rate=self.rate,
 			input=True,
-			frames_per_buffer=self.frames_per_buffer
+			output=False,
+			input_device_index=self.device_index
 		)
 		self.audio_frames = [ ]
 
@@ -125,24 +127,25 @@ class AudioRecorder:
 		while self.open:
 			data = self.stream.read( self.frames_per_buffer )
 			self.audio_frames.append( data )
-			if not self.open:
+			if not self.open:  # Is this line necessary? Might have to do something with audio timing, but seems rather pointless
 				break
 
 	# Finishes the audio recording therefore the thread too
 	def stop( self ):
+		if not self.open:
+			return
 
-		if self.open:
-			self.open = False
-			self.stream.stop_stream()
-			self.stream.close()
-			self.audio.terminate()
+		self.open = False
+		self.stream.stop_stream()
+		self.stream.close()
+		self.audio.terminate()
 
-			wave_file = wave.open( self.audio_filename, 'wb' )
-			wave_file.setnchannels( self.channels )
-			wave_file.setsampwidth( self.audio.get_sample_size( self.format ) )
-			wave_file.setframerate( self.rate )
-			wave_file.writeframes( b''.join( self.audio_frames ) )
-			wave_file.close()
+		wave_file = wave.open( self.audio_filename, 'wb' )
+		wave_file.setnchannels( self.channels )
+		wave_file.setsampwidth( self.audio.get_sample_size( self.format ) )
+		wave_file.setframerate( self.rate )
+		wave_file.writeframes( b''.join( self.audio_frames ) )
+		wave_file.close()
 
 		pass
 
@@ -150,6 +153,14 @@ class AudioRecorder:
 	def start( self ):
 		audio_thread = threading.Thread( target=self.record )
 		audio_thread.start()
+
+	def find_device_index( self ):
+		device_index = -1
+		for x in range( 0, self.audio.get_device_count() ):
+			info = self.audio.get_device_info_by_index( x )
+			if info[ "name" ] == "pulse":
+				device_index = info[ "index" ]
+		return device_index
 
 
 def start_AVrecording( filename ):
@@ -197,7 +208,7 @@ def stop_AVrecording( filename ):
 	while threading.active_count() > 1:
 		time.sleep( 1 )
 
-	#	 Merging audio and video signal
+	# Merging audio and video signal
 
 	if abs( recorded_fps - 30 ) >= 0.01:  # If the fps rate was higher/lower than expected, re-encode it to the expected
 
@@ -217,8 +228,8 @@ def stop_AVrecording( filename ):
 
 		print( ".." )
 
-
-# file_manager( filename )
+	# file_manager( filename )
+	pass
 
 
 # Required and wanted processing of final files
