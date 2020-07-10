@@ -92,8 +92,8 @@ class VideoRecorder:
 
 	# Launches the video recording function using a thread
 	def start( self ):
-		video_thread = threading.Thread( target=self.record )
-		video_thread.start()
+		video_recording_thread = threading.Thread( target=self.record )
+		video_recording_thread.start()
 
 
 class AudioRecorder:
@@ -150,8 +150,8 @@ class AudioRecorder:
 
 	# Launches the audio recording function using a thread
 	def start( self ):
-		audio_thread = threading.Thread( target=self.record )
-		audio_thread.start()
+		audio_recording_thread = threading.Thread( target=self.record )
+		audio_recording_thread.start()
 
 	def find_device_index( self ):
 		device_index = -1
