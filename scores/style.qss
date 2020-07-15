@@ -1,0 +1,45 @@
+TitleText, ScoreCake, QChartView, QWidget {
+    background: transparent
+}
+
+MainWindow {
+	background: #4C4C4C;
+}
+
+ScoreCake, QChartView, QGraphicsView {
+	border: none;
+}
+
+ScorePanel > QLabel {
+	font-size: 50pt;
+	font-weight: 900;
+	font-family: "Fira Sans";
+	color: "#000000";
+	qproperty-alignment: AlignCenter;
+	border: 2px solid black;
+	border-width: 5px 5px 4px 5px;
+}
+
+ScoreButton {
+    height: 75px;
+    width: 75px;
+    margin: 0;
+    padding: 0;
+    border: 2px solid black;
+    background-color: #7C7C7C;
+
+    font-size: 50pt;
+	font-weight: 900;
+	font-family: "Fira Sans";
+	color: "#4C4C4C";
+}
+
+ScoreButton[state="-1"] {
+    background-color: #991020;
+    color: #4C4C4C;
+}
+
+ScoreButton[state="1"] {
+    background-color: #20C030;
+    color: "#CCCCCC"
+}
