@@ -6,7 +6,6 @@ import time
 import subprocess
 import os
 
-
 ########################
 # JRF
 # VideoRecorder and AudioRecorder are two classes based on openCV and pyaudio, respectively.
@@ -29,6 +28,9 @@ import os
 #
 #
 ########################
+
+target_fps = 15
+
 
 class VideoRecorder:
 
@@ -63,7 +65,7 @@ class VideoRecorder:
 				self.frame_counts += 1
 				# counter += 1
 				# timer_current = time.time() - timer_start
-				time.sleep( 0.16 )
+				time.sleep( 1 / target_fps )
 
 			# Uncomment the following three lines to make the video to be
 			# displayed to screen while recording
@@ -138,7 +140,7 @@ class AudioRecorder:
 		self.open = False
 		while not self.finished:
 			time.sleep( 0 )
-			
+
 		self.stream.stop_stream()
 		self.stream.close()
 		self.audio.terminate()
@@ -217,7 +219,8 @@ def stop_av_recording( filename ):
 
 	# Merging audio and video signal
 
-	if abs( recorded_fps - 30 ) >= 0.01:  # If the fps rate was higher/lower than expected, re-encode it to the expected
+	if abs(
+			recorded_fps - target_fps ) >= 0.01:  # If the fps rate was higher/lower than expected, re-encode it to the expected
 
 		print( "Re-encoding" )
 		cmd = "ffmpeg -r " + str( recorded_fps ) + f" -i {filename}.avi -pix_fmt yuv420p -r 6 {filename}2.avi"
