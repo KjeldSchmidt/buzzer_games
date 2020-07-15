@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton
 
+from VideoQuestionsGame import VideoQuestionsGame
 from WebcamBuzzerGame import WebcamBuzzerGame
 
 
@@ -21,13 +22,15 @@ class GameSelector( QWidget ):
 
 		self.setLayout( self.layout )
 
-	@staticmethod
-	def on_start_buzzer():
-		buzzer_game_window = WebcamBuzzerGame()
+	def on_start_buzzer( self ):
+		buzzer_game_window = WebcamBuzzerGame( self.serial )
+		buzzer_game_window.setStyleSheet( self.styleSheet() )
 		buzzer_game_window.show()
 
 	def on_start_video( self ):
-		pass
+		video_questions_game = VideoQuestionsGame()
+		video_questions_game.setStyleSheet( self.styleSheet() )
+		video_questions_game.show()
 
 	def on_start_freestyle( self ):
 		pass

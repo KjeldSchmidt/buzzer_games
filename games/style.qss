@@ -1,0 +1,19 @@
+QWidget {
+	background: #4C4C4C;
+}
+
+QPushButton, QSpinBox {
+    border: 1px solid black;
+    background-color: #606060;
+    padding: 5px;
+    border-radius: 5px;
+    color: #CCCCCC;
+}
+
+QSlider {
+    background: #4C4C4C;
+}
+
+QSpinBox::up-button, QSpinBox::down-button {
+    width: 0;
+}
