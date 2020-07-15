@@ -4,7 +4,7 @@ from PyQt5 import QtSerialPort, QtCore
 from PyQt5.QtCore import QUrl, QFileInfo
 from PyQt5.QtMultimedia import QMediaContent
 from PyQt5.QtSerialPort import QSerialPort
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QFileDialog, QSpinBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QFileDialog, QSpinBox, QDialog, QMessageBox
 
 import VideoRecorder as vc
 from ReplayWindow import ReplayWindow
@@ -32,17 +32,22 @@ class WebcamBuzzerGame( QWidget ):
 
 		self.offset_input = QSpinBox()
 		self.offset_input.setRange( 0, 1000 * 60 * 60 )
-		self.offset_input.setValue( 5000 )
+		self.offset_input.setValue( 0 )
+
+		self.latency_input = QSpinBox()
+		self.latency_input.setRange( -5000, 5000 )
+		self.latency_input.setValue( 0 )
 
 		self.layout.addWidget( self.offset_input )
 		self.layout.addWidget( self.select_audio )
 		self.layout.addWidget( self.start_timer )
 		self.layout.addWidget( self.end_recording )
 		self.layout.addWidget( self.show_replay )
+		self.layout.addWidget( self.latency_input )
 
 		self.setLayout( self.layout )
 
-		self.replay_window = ReplayWindow( self.styleSheet() )
+		self.replay_window = ReplayWindow( self.styleSheet(), self.latency_input )
 		self.replay_window.showMaximized()
 
 		self.time_result = None
@@ -71,18 +76,24 @@ class WebcamBuzzerGame( QWidget ):
 		return handler
 
 	def on_start_timer( self ):
-		self.serial.write( "v".encode() )
-		self.replay_window.music_player.play()
-		self.start_recording()
+		if self.offset_input.value() != 0:
+			self.serial.write( "v".encode() )
+			self.replay_window.music_player.play()
+			self.start_recording()
+		else:
+			mbox = QMessageBox()
+			mbox.setText( "Set desired timing!" )
+			mbox.exec_()
 
 	def on_stop_recording( self ):
 		self.serial.write( "i".encode() )
 		self.replay_window.music_player.stop()
 		self.stop_recording()
-
-	def on_show_replay( self ):
 		self.replay_window.time_result = self.time_result
 		self.replay_window.offset_defined = self.offset_input.value()
+		self.offset_input.setValue( 0 )
+
+	def on_show_replay( self ):
 		self.replay_window.replay( self.current_video_file )
 
 	@QtCore.pyqtSlot()

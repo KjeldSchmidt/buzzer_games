@@ -1,3 +1,5 @@
+import time
+
 from PyQt5 import QtCore
 from PyQt5.QtCore import QFileInfo, QUrl
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
@@ -6,10 +8,11 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
 
 
 class ReplayWindow( QWidget ):
-	def __init__( self, stylesheet ):
-		super().__init__()
+	def __init__( self, stylesheet, latency_input, **kwargs ):
+		super().__init__( **kwargs )
 
 		self.setStyleSheet( stylesheet )
+		self.latency_input = latency_input
 
 		self.offset_defined = None
 		self.time_result = None
@@ -78,9 +81,18 @@ class ReplayWindow( QWidget ):
 		a_path = QFileInfo( f"recordings/{file}.wav" ).absoluteFilePath()
 		self.v_player.setMedia( QMediaContent( QUrl.fromLocalFile( v_path ) ) )
 		self.recording_player.setMedia( QMediaContent( QUrl.fromLocalFile( a_path ) ) )
-		self.music_player.play()
-		self.v_player.play()
-		self.recording_player.play()
+
+		latency = self.latency_input.value() / 1000
+		if latency >= 0:
+			self.music_player.play()
+			time.sleep( latency )
+			self.v_player.play()
+			self.recording_player.play()
+		else:
+			self.v_player.play()
+			self.recording_player.play()
+			time.sleep( -latency )
+			self.music_player.play()
 
 	def video_ended( self ):
 		if self.v_player.state() == QMediaPlayer.StoppedState:

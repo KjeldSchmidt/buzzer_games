@@ -127,7 +127,7 @@ class AudioRecorder:
 
 		self.stream.start_stream()
 		while self.open:
-			data = self.stream.read( self.frames_per_buffer )
+			data = self.stream.read( self.frames_per_buffer, False )
 			self.audio_frames.append( data )
 
 		self.finished = True
