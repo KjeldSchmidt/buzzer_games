@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import QApplication
-from MainWindow import MainWindow
+
+from GameSelector import GameSelector
 
 app = QApplication( [ ] )
-window = MainWindow()
+window = GameSelector()
 window.show()
 app.exec_()

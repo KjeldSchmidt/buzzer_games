@@ -5,13 +5,11 @@ from PyQt5.QtCore import QUrl, QFileInfo
 from PyQt5.QtMultimedia import QMediaContent
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QFileDialog, QSpinBox
 
-import shortuuid
-
 import VideoRecorder as vc
 from ReplayWindow import ReplayWindow
 
 
-class MainWindow( QWidget ):
+class WebcamBuzzerGame( QWidget ):
 	def __init__( self ):
 		super().__init__()
 		self.layout = QVBoxLayout()
