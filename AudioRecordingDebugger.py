@@ -1,3 +1,4 @@
+import time
 import wave
 
 import pyaudio
@@ -11,8 +12,8 @@ for x in range( 0, pa.get_device_count() ):
 		print( info )
 		print( "Chosen index: ", chosen_device_index )
 
-channel_count = 2
-rate = 44100
+channel_count = 1
+rate = 16000
 stream = pa.open(
 	format=pyaudio.paInt16,
 	channels=channel_count,
@@ -25,7 +26,8 @@ stream.start_stream()
 audio_frames = [ ]
 
 print( "start recording" )
-for i in range( 500 ):
+start = time.time()
+while time.time() - start < 30:
 	data = stream.read( 1024 )
 	audio_frames.append( data )
 print( "end recording" )

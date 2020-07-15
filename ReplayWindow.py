@@ -1,5 +1,6 @@
 from PyQt5 import QtCore
-from PyQt5.QtMultimedia import QMediaPlayer
+from PyQt5.QtCore import QFileInfo, QUrl
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
 
@@ -21,7 +22,9 @@ class ReplayWindow( QWidget ):
 		self.v_player.setVideoOutput( self.video_w )
 		self.v_player.setNotifyInterval( 7 )
 		self.v_player.positionChanged.connect( self.update_time_label )
-		self.a_player = QMediaPlayer( None, QMediaPlayer.LowLatency )
+		self.v_player.stateChanged.connect( self.video_ended )
+		self.music_player = QMediaPlayer( None, QMediaPlayer.LowLatency )
+		self.recording_player = QMediaPlayer( None, QMediaPlayer.LowLatency )
 
 		self.layout.addWidget( self.timer_label )
 		self.layout.addWidget( self.video_w )
@@ -47,7 +50,7 @@ class ReplayWindow( QWidget ):
 	def update_time_label( self ):
 		if self.time_result is None:
 			return
-		
+
 		position = self.v_player.position()
 		if position > self.time_result:
 			text = self.format_millis( self.time_result - self.offset_defined )
@@ -69,3 +72,16 @@ class ReplayWindow( QWidget ):
 			"""
 		)
 		return timer_label
+
+	def replay( self, file: str ):
+		v_path = QFileInfo( f"recordings/{file}2.avi" ).absoluteFilePath()
+		a_path = QFileInfo( f"recordings/{file}.wav" ).absoluteFilePath()
+		self.v_player.setMedia( QMediaContent( QUrl.fromLocalFile( v_path ) ) )
+		self.recording_player.setMedia( QMediaContent( QUrl.fromLocalFile( a_path ) ) )
+		self.music_player.play()
+		self.v_player.play()
+		self.recording_player.play()
+
+	def video_ended( self ):
+		if self.v_player.state() == QMediaPlayer.StoppedState:
+			self.music_player.stop()

@@ -16,7 +16,7 @@ class MainWindow( QWidget ):
 
 		self.serial = self.init_serial()
 
-		self.current_video_file: str
+		self.current_video_file: str = ""
 
 		self.select_audio = QPushButton( "Select Audio" )
 		self.select_audio.clicked.connect( self.on_select_audio() )
@@ -56,33 +56,30 @@ class MainWindow( QWidget ):
 			filename = QFileDialog.getOpenFileName( self, "Select Video", filter="Movies (*.mp4)" )
 			self.replay_window.v_player.setMedia( QMediaContent( QUrl.fromLocalFile( filename[ 0 ] ) ) )
 			self.replay_window.v_player.play()
-			self.replay_window.a_player.play()
+			self.replay_window.music_player.play()
 
 		return handler
 
 	def on_select_audio( self ):
 		def handler():
-			filename = QFileDialog.getOpenFileName( self, "Select Sound", filter="Sound (*.mp3)" )
-			self.replay_window.a_player.setMedia( QMediaContent( QUrl.fromLocalFile( filename[ 0 ] ) ) )
+			filename = QFileDialog.getOpenFileName( self, "Select Sound", filter="Sound (*.mp3)", directory="clips/" )
+			self.replay_window.music_player.setMedia( QMediaContent( QUrl.fromLocalFile( filename[ 0 ] ) ) )
 
 		return handler
 
 	def on_start_timer( self ):
 		self.serial.write( "start_buzzer".encode() )
-		self.replay_window.a_player.play()
+		self.replay_window.music_player.play()
 		self.start_recording()
 
 	def on_stop_recording( self ):
-		self.replay_window.a_player.stop()
+		self.replay_window.music_player.stop()
 		self.stop_recording()
 
 	def on_show_replay( self ):
-		path = QFileInfo( f"{self.current_video_file}_final.avi" ).absoluteFilePath()
 		self.replay_window.time_result = self.time_result
 		self.replay_window.offset_defined = self.offset_input.value()
-		self.replay_window.v_player.setMedia( QMediaContent( QUrl.fromLocalFile( path ) ) )
-		self.replay_window.a_player.play()
-		self.replay_window.v_player.play()
+		self.replay_window.replay( self.current_video_file )
 
 	def init_serial( self ):
 		port = QtSerialPort.QSerialPort(
@@ -100,5 +97,5 @@ class MainWindow( QWidget ):
 			message = self.serial.readLine().data().decode()
 			message = message.rstrip( '\r\n' )
 
-		time = self.replay_window.a_player.position()
+		time = self.replay_window.music_player.position()
 		self.time_result = time

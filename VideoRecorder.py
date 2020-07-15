@@ -104,9 +104,9 @@ class AudioRecorder:
 		self.device_index = self.find_device_index()
 
 		self.open = True
-		self.rate = 44100
+		self.rate = 16000
 		self.frames_per_buffer = 1024
-		self.channels = 2
+		self.channels = 1
 		self.format = pyaudio.paInt16
 		self.audio_filename = f"{filename}.wav"
 		self.stream = self.audio.open(
