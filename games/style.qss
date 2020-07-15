@@ -10,7 +10,11 @@ QPushButton, QSpinBox {
     color: #CCCCCC;
 }
 
-QSlider {
+QLabel {
+    color: #CCCCCC;
+}
+
+QSlider, QMediaPlayer {
     background: #4C4C4C;
 }
 

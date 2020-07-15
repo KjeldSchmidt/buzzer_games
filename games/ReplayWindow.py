@@ -6,10 +6,10 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
 
 
 class ReplayWindow( QWidget ):
-	def __init__( self ):
+	def __init__( self, stylesheet ):
 		super().__init__()
 
-		self.setStyleSheet( "background-color:black;" )
+		self.setStyleSheet( stylesheet )
 
 		self.offset_defined = None
 		self.time_result = None
@@ -65,7 +65,7 @@ class ReplayWindow( QWidget ):
 		timer_label.setAlignment( QtCore.Qt.AlignRight )
 		timer_label.setStyleSheet(
 			"""
-			color:white;
+			color: #CCCCCC;
 			font-size:32px;
 			padding: 16px;
 			position: absolute;			

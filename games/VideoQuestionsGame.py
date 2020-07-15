@@ -2,6 +2,7 @@ from PyQt5 import QtSerialPort, QtCore
 from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
+from PyQt5.QtSerialPort import QSerialPort
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QFileDialog, QSlider
 
 
@@ -55,11 +56,12 @@ class VideoPlayerWindow( QWidget ):
 
 
 class VideoQuestionsGame( QWidget ):
-	def __init__( self ):
+	def __init__( self, serial: QSerialPort, stylesheet ):
 		super().__init__()
+		self.serial = serial
+		self.serial.readyRead.connect( self.handle_serial )
+		self.setStyleSheet( stylesheet )
 		self.layout = QVBoxLayout()
-
-		self.serial = self.init_serial()
 
 		self.select_video = QPushButton( "Select Video" )
 		self.select_video.clicked.connect( self.on_select_video() )
@@ -75,6 +77,21 @@ class VideoQuestionsGame( QWidget ):
 		self.video_window.setStyleSheet( self.styleSheet() )
 		self.video_window.showMaximized()
 
+	@QtCore.pyqtSlot()
+	def handle_serial( self ):
+		message = self.serial.readLine().data().decode()
+		message = message.rstrip( '\r\n' )
+		message = message[ -1 ]
+		if message == "s":
+			self.video_window.v_player.pause()
+		elif message == "c":
+			self.video_window.v_player.play()
+
+	def hideEvent( self, hide_event ):
+		super().hideEvent( hide_event )
+		self.video_window.v_player.stop()
+		self.video_window.close()
+
 	def on_select_video( self ):
 		def handler():
 			filename = QFileDialog.getOpenFileName( parent=self, caption="Select Video", filter="Movies (*.mp4)" )
@@ -84,15 +101,3 @@ class VideoQuestionsGame( QWidget ):
 
 	def on_play_video( self ):
 		self.video_window.v_player.play()
-
-	@QtCore.pyqtSlot()
-	def receive( self ):
-		message = ""
-		while self.serial.canReadLine():
-			message = self.serial.readLine().data().decode()
-			message = message.rstrip( '\r\n' )
-
-		if message == "pause":
-			self.video_window.v_player.pause()
-		elif message == "player":
-			self.video_window.v_player.play()

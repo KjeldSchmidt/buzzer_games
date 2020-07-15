@@ -3,6 +3,7 @@ import time
 from PyQt5 import QtSerialPort, QtCore
 from PyQt5.QtCore import QUrl, QFileInfo
 from PyQt5.QtMultimedia import QMediaContent
+from PyQt5.QtSerialPort import QSerialPort
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QFileDialog, QSpinBox
 
 import VideoRecorder as vc
@@ -10,11 +11,13 @@ from ReplayWindow import ReplayWindow
 
 
 class WebcamBuzzerGame( QWidget ):
-	def __init__( self ):
+	def __init__( self, serial: QSerialPort, stylesheet ):
 		super().__init__()
+		self.setStyleSheet( stylesheet )
 		self.layout = QVBoxLayout()
 
-		self.serial = self.init_serial()
+		self.serial = serial
+		self.serial.readyRead.connect( self.receive )
 
 		self.current_video_file: str = ""
 
@@ -39,13 +42,16 @@ class WebcamBuzzerGame( QWidget ):
 
 		self.setLayout( self.layout )
 
-		self.replay_window = ReplayWindow()
+		self.replay_window = ReplayWindow( self.styleSheet() )
 		self.replay_window.showMaximized()
 
 		self.time_result = None
 
+	def hideEvent( self, QHideEvent ):
+		super().hideEvent( QHideEvent )
+		self.replay_window.close()
+
 	def start_recording( self ):
-		# self.current_video_file = shortuuid.uuid()
 		self.current_video_file = time.strftime( '%H-%M-%S', time.localtime() )
 		vc.start_av_recording( self.current_video_file )
 
@@ -69,11 +75,12 @@ class WebcamBuzzerGame( QWidget ):
 		return handler
 
 	def on_start_timer( self ):
-		self.serial.write( "start_buzzer".encode() )
+		self.serial.write( "v".encode() )
 		self.replay_window.music_player.play()
 		self.start_recording()
 
 	def on_stop_recording( self ):
+		self.serial.write( "i".encode() )
 		self.replay_window.music_player.stop()
 		self.stop_recording()
 
@@ -82,21 +89,6 @@ class WebcamBuzzerGame( QWidget ):
 		self.replay_window.offset_defined = self.offset_input.value()
 		self.replay_window.replay( self.current_video_file )
 
-	def init_serial( self ):
-		port = QtSerialPort.QSerialPort(
-			'/dev/ttyUSB0',
-			baudRate=QtSerialPort.QSerialPort.Baud9600,
-			readyRead=self.receive
-		)
-		port.open( QtCore.QIODevice.ReadWrite )
-		return port
-
 	@QtCore.pyqtSlot()
 	def receive( self ):
-		message: str
-		while self.serial.canReadLine():
-			message = self.serial.readLine().data().decode()
-			message = message.rstrip( '\r\n' )
-
-		time = self.replay_window.music_player.position()
-		self.time_result = time
+		self.time_result = self.replay_window.music_player.position()

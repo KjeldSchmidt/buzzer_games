@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import QApplication
 
-from GameSelector import GameSelector
+from GameSelector import ControllerWindow
 
+stylesheet = open( "style.qss", "r" ).read()
 app = QApplication( [ ] )
-window = GameSelector()
-window.setStyleSheet( open( "style.qss", "r" ).read() )
+window = ControllerWindow( None, stylesheet )
 window.show()
 app.exec_()
