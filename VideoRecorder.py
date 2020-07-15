@@ -104,6 +104,7 @@ class AudioRecorder:
 		self.device_index = self.find_device_index()
 
 		self.open = True
+		self.finished = False
 		self.rate = 16000
 		self.frames_per_buffer = 1024
 		self.channels = 1
@@ -127,12 +128,17 @@ class AudioRecorder:
 			data = self.stream.read( self.frames_per_buffer )
 			self.audio_frames.append( data )
 
+		self.finished = True
+
 	# Finishes the audio recording therefore the thread too
 	def stop( self ):
 		if not self.open:
 			return
 
 		self.open = False
+		while not self.finished:
+			time.sleep( 0 )
+			
 		self.stream.stop_stream()
 		self.stream.close()
 		self.audio.terminate()
