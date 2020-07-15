@@ -40,6 +40,8 @@ class ControllerWindow( QWidget ):
 		if new_game_widget:
 			self.game_layout.addWidget( new_game_widget )
 
+		self.raise_()
+
 	def on_start_buzzer( self ):
 		buzzer_game_window = WebcamBuzzerGame( self.serial, self.styleSheet() )
 		buzzer_game_window.setStyleSheet( self.styleSheet() )

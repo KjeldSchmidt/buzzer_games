@@ -58,18 +58,14 @@ class WebcamBuzzerGame( QWidget ):
 	def stop_recording( self ):
 		vc.stop_av_recording( self.current_video_file )
 
-	def on_select_play( self ):
-		def handler():
-			filename = QFileDialog.getOpenFileName( self, "Select Video", filter="Movies (*.mp4)" )
-			self.replay_window.v_player.setMedia( QMediaContent( QUrl.fromLocalFile( filename[ 0 ] ) ) )
-			self.replay_window.v_player.play()
-			self.replay_window.music_player.play()
-
-		return handler
-
 	def on_select_audio( self ):
 		def handler():
-			filename = QFileDialog.getOpenFileName( self, "Select Sound", filter="Sound (*.mp3)", directory="clips/" )
+			filename = QFileDialog.getOpenFileName(
+				self,
+				"Select Sound",
+				filter="Sound (*.mp3)",
+				directory="../data/webcam_soundfiles"
+			)
 			self.replay_window.music_player.setMedia( QMediaContent( QUrl.fromLocalFile( filename[ 0 ] ) ) )
 
 		return handler

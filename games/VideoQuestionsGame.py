@@ -94,7 +94,12 @@ class VideoQuestionsGame( QWidget ):
 
 	def on_select_video( self ):
 		def handler():
-			filename = QFileDialog.getOpenFileName( parent=self, caption="Select Video", filter="Movies (*.mp4)" )
+			filename = QFileDialog.getOpenFileName(
+				parent=self,
+				caption="Select Video",
+				filter="Movies (*.mp4)",
+				directory="../data/video_question_videos"
+			)
 			self.video_window.v_player.setMedia( QMediaContent( QUrl.fromLocalFile( filename[ 0 ] ) ) )
 
 		return handler

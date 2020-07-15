@@ -56,9 +56,6 @@ void init_light_up() {
 
 void init_free_play() {
 	state = State::FREEPLAY_WAIT_BUZZER;
-	digitalWrite( buzzer1_out, 1 );
-	digitalWrite( buzzer2_out, 1 );
-	delay( 100 );
 	digitalWrite( buzzer1_out, 0 );
 	digitalWrite( buzzer2_out, 0 );
 }
@@ -124,5 +121,8 @@ void loop() {
 		check_for_buzzer();
 	} else if ( state == State::FREEPLAY_WAIT_BUZZER ) {
 		check_for_freeplay_buzzer();
+	} else if ( state == State::IDLE ) {
+		digitalWrite( buzzer1_out, !digitalRead( buzzer1_in ));
+		digitalWrite( buzzer2_out, !digitalRead( buzzer2_in ));
 	}
 }
