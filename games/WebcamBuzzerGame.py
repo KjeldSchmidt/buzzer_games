@@ -1,10 +1,10 @@
 import time
 
-from PyQt5 import QtSerialPort, QtCore
-from PyQt5.QtCore import QUrl, QFileInfo
+from PyQt5 import QtCore
+from PyQt5.QtCore import QUrl
 from PyQt5.QtMultimedia import QMediaContent
 from PyQt5.QtSerialPort import QSerialPort
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QFileDialog, QSpinBox, QDialog, QMessageBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QFileDialog, QSpinBox, QMessageBox
 
 import VideoRecorder as vc
 from ReplayWindow import ReplayWindow
@@ -34,20 +34,15 @@ class WebcamBuzzerGame( QWidget ):
 		self.offset_input.setRange( 0, 1000 * 60 * 60 )
 		self.offset_input.setValue( 0 )
 
-		self.latency_input = QSpinBox()
-		self.latency_input.setRange( -5000, 5000 )
-		self.latency_input.setValue( 0 )
-
 		self.layout.addWidget( self.offset_input )
 		self.layout.addWidget( self.select_audio )
 		self.layout.addWidget( self.start_timer )
 		self.layout.addWidget( self.end_recording )
 		self.layout.addWidget( self.show_replay )
-		self.layout.addWidget( self.latency_input )
 
 		self.setLayout( self.layout )
 
-		self.replay_window = ReplayWindow( self.styleSheet(), self.latency_input )
+		self.replay_window = ReplayWindow( self.styleSheet() )
 		self.replay_window.showMaximized()
 
 		self.time_result = None
@@ -69,7 +64,7 @@ class WebcamBuzzerGame( QWidget ):
 				self,
 				"Select Sound",
 				filter="Sound (*.mp3)",
-				directory="../data/webcam_soundfiles"
+				directory="/home/kjeld/Desktop/schlag_den_boehm/data/webcam_soundfiles"
 			)
 			self.replay_window.music_player.setMedia( QMediaContent( QUrl.fromLocalFile( filename[ 0 ] ) ) )
 
@@ -91,6 +86,10 @@ class WebcamBuzzerGame( QWidget ):
 		self.stop_recording()
 		self.replay_window.time_result = self.time_result
 		self.replay_window.offset_defined = self.offset_input.value()
+
+		with open( f"recordings/timing.txt", "a" ) as file:
+			file.write( f"{self.current_video_file}, {self.offset_input.value()}, {self.time_result}\n" )
+
 		self.offset_input.setValue( 0 )
 
 	def on_show_replay( self ):
