@@ -104,10 +104,10 @@ void check_for_freeplay_buzzer() {
 
 	Serial.write( 's' );
 	digitalWrite( get_led_from_player( current_player ), HIGH );
-	delay( 10000 );
+	delay( 5000 );
 	digitalWrite( get_led_from_player( current_player ), LOW );
 	digitalWrite( get_led_from_player( second_player ), HIGH );
-	delay( 10000 );
+	delay( 5000 );
 	digitalWrite( get_led_from_player( second_player ), LOW );
 	Serial.write( 'c' );
 }
