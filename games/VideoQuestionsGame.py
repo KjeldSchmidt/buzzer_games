@@ -1,58 +1,10 @@
-from PyQt5 import QtSerialPort, QtCore
-from PyQt5.QtCore import QUrl, Qt
-from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
-from PyQt5.QtMultimediaWidgets import QVideoWidget
+from PyQt5 import QtCore
+from PyQt5.QtCore import QUrl
+from PyQt5.QtMultimedia import QMediaContent
 from PyQt5.QtSerialPort import QSerialPort
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QFileDialog, QSlider
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QFileDialog
 
-
-class VideoPlayerWindow( QWidget ):
-	def __init__( self ):
-		super().__init__()
-
-		self.slider_in_use = False
-
-		self.video_w = QVideoWidget()
-		self.slider = QSlider( Qt.Horizontal )
-		self.slider.sliderPressed.connect( self.slider_pressed )
-		self.slider.sliderReleased.connect( self.slider_value_changed )
-
-		self.v_player = QMediaPlayer( None, QMediaPlayer.VideoSurface )
-		self.v_player.setVideoOutput( self.video_w )
-		self.v_player.setNotifyInterval( 50 )
-		self.v_player.durationChanged.connect( self.video_duration_changed )
-		self.v_player.positionChanged.connect( self.video_position_changed )
-		self.v_player.stateChanged.connect( self.video_ended )
-
-		self._layout = QVBoxLayout()
-
-		self._layout.addWidget( self.video_w )
-		self._layout.addWidget( self.slider )
-
-		self._layout.setSpacing( 0 )
-		self._layout.setContentsMargins( 0, 0, 0, 0 )
-
-		self.setLayout( self._layout )
-
-	def video_duration_changed( self ):
-		self.slider.setRange( 0, self.v_player.duration() )
-
-	def slider_pressed( self ):
-		self.slider_in_use = True
-
-	def video_position_changed( self ):
-		if not self.slider_in_use:
-			self.slider.setValue( self.v_player.position() )
-
-	def slider_value_changed( self ):
-		self.v_player.setPosition( self.slider.value() )
-		self.slider_in_use = False
-
-	def video_ended( self, state ):
-		if state == QMediaPlayer.StoppedState:
-			self.v_player.setPosition( self.v_player.duration() - 10 )
-			self.v_player.play()
-			self.v_player.pause()
+from VideoPlayerWithControls import VideoPlayerWithControls
 
 
 class VideoQuestionsGame( QWidget ):
@@ -73,7 +25,7 @@ class VideoQuestionsGame( QWidget ):
 
 		self.setLayout( self.layout )
 
-		self.video_window = VideoPlayerWindow()
+		self.video_window = VideoPlayerWithControls()
 		self.video_window.setStyleSheet( self.styleSheet() )
 		self.video_window.showMaximized()
 
@@ -98,7 +50,7 @@ class VideoQuestionsGame( QWidget ):
 				parent=self,
 				caption="Select Video",
 				filter="Movies (*.mp4)",
-				directory="../data/video_question_videos"
+				directory="/home/kjeld/Desktop/schlag_den_boehm/data/video_question_videos"
 			)
 			self.video_window.v_player.setMedia( QMediaContent( QUrl.fromLocalFile( filename[ 0 ] ) ) )
 
