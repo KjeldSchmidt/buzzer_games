@@ -78,13 +78,18 @@ class ReplayWindow( QWidget ):
 	def replay( self, file: str ):
 		v_path = QFileInfo( f"recordings/{file}2.avi" ).absoluteFilePath()
 		a_path = QFileInfo( f"recordings/{file}.wav" ).absoluteFilePath()
-		self.video_w.v_player.setMedia( QMediaContent( QUrl.fromLocalFile( v_path ) ) )
+		self.v_player.setMedia( QMediaContent( QUrl.fromLocalFile( v_path ) ) )
 		self.recording_player.setMedia( QMediaContent( QUrl.fromLocalFile( a_path ) ) )
 
 		self.music_player.play()
 		time.sleep( 0.255 )  # Latency guessed empirically
-		self.video_w.v_player.play()
+		self.v_player.play()
 		self.recording_player.play()
+
+	def end_replay( self ):
+		self.music_player.stop()
+		self.v_player.stop()
+		self.recording_player.stop()
 
 	def video_ended( self ):
 		if self.v_player.state() == QMediaPlayer.StoppedState:
