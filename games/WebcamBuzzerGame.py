@@ -29,8 +29,6 @@ class WebcamBuzzerGame( QWidget ):
 		self.end_recording.clicked.connect( self.on_stop_recording )
 		self.show_replay = QPushButton( "Show Replay" )
 		self.show_replay.clicked.connect( self.on_show_replay )
-		self.end_replay = QPushButton( "End Replay" )
-		self.end_replay.clicked.connect( self.on_end_replay )
 
 		self.offset_input = QSpinBox()
 		self.offset_input.setRange( 0, 1000 * 60 * 60 )
@@ -41,7 +39,6 @@ class WebcamBuzzerGame( QWidget ):
 		self.layout.addWidget( self.start_timer )
 		self.layout.addWidget( self.end_recording )
 		self.layout.addWidget( self.show_replay )
-		self.layout.addWidget( self.end_replay )
 
 		self.setLayout( self.layout )
 
@@ -97,9 +94,6 @@ class WebcamBuzzerGame( QWidget ):
 
 	def on_show_replay( self ):
 		self.replay_window.replay( self.current_video_file )
-
-	def on_end_replay( self ):
-		self.replay_window.end_replay()
 
 	@QtCore.pyqtSlot()
 	def receive( self ):
