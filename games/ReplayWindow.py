@@ -136,6 +136,10 @@ class ReplayWindow( QWidget ):
 		return timer_label
 
 	def replay( self, file: str ):
+		self.music_player.stop()
+		self.v_player.stop()
+		self.recording_player.stop()
+		
 		v_path = QFileInfo( f"recordings/{file}2.avi" ).absoluteFilePath()
 		a_path = QFileInfo( f"recordings/{file}.wav" ).absoluteFilePath()
 		self.v_player.setMedia( QMediaContent( QUrl.fromLocalFile( v_path ) ) )
