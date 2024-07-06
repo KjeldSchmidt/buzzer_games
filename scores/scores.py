@@ -33,7 +33,7 @@ class Player( QObject ):
 
 
 player_1 = Player( "Lukas", QColor( "#FFE014" ) )
-player_2 = Player( "Kjeld", QColor( "#0088C7" ) )
+player_2 = Player( "Eileen", QColor( "#2c7822" ) )
 remaining_points_color = QColor( "#000000" )
 
 
