@@ -25,11 +25,11 @@ class Player( QObject ):
 
 	def add_score( self, score: int ):
 		self.score += score
-		self.score_added.emit( score )
+		self.score_added.emit( score)
 
 	def subtract_score( self, score: int ):
 		self.score -= score
-		self.score_subtracted.emit( score )
+		self.score_subtracted.emit( score)
 
 
 player_1 = Player( "Lukas", QColor( "#FFE014" ) )
@@ -185,14 +185,19 @@ class ScoreButtonContainer( QWidget ):
 		self.player = player
 		opponent = player_1 if player == player_2 else player_2
 		opponent.score_added.connect( self.handle_opponent )
+		opponent.score_subtracted.connect( self.handle_opponent )
 
-	def handle_opponent( self, score: int ):
+	def handle_opponent( self, score: int):
 		button = self.layout.itemAt( score - 1 ).widget()
-
 		if button.state == 1:
 			button.player.subtract_score( score )
+			button.change_state( -1 )
+		elif button.state == -1:
+			button.change_state( 0 )
+		elif button.state == 0:
+			button.change_state( -1 )
 
-		button.change_state( -1 )
+		
 
 	@staticmethod
 	def make_button_callback( button, player: Player, score: int ):
@@ -200,7 +205,9 @@ class ScoreButtonContainer( QWidget ):
 			if button.state == 0 or button.state == -1:
 				player.add_score( score )
 				button.change_state( 1 )
-
+			elif button.state == 1:
+				player.subtract_score( score )
+				button.change_state( 0 )
 		return callback
 
 
