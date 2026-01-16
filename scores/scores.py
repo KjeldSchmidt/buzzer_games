@@ -3,12 +3,21 @@ from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPu
 	QGraphicsScene, QGraphicsPixmapItem, QGraphicsView
 from PyQt5.QtChart import QChart, QChartView, QPieSeries, QPieSlice
 from PyQt5.QtGui import QPainter, QColor, QBrush, QPalette, QFont, QPixmap
+import os
 
 
 def main():
 	app = QApplication( [ ] )
 	main_window = MainWindow()
-	main_window.setStyleSheet( open( "style.qss", "r" ).read() )
+	
+	# Get the directory where scores.py is located
+	script_dir = os.path.dirname(os.path.abspath(__file__))
+	
+	# Build proper paths to required files
+	style_path = os.path.join(script_dir, "style.qss")
+	
+	# Load stylesheet with absolute path
+	main_window.setStyleSheet( open( style_path, "r" ).read() )
 	main_window.showMaximized()
 	app.exec_()
 
@@ -25,15 +34,15 @@ class Player( QObject ):
 
 	def add_score( self, score: int ):
 		self.score += score
-		self.score_added.emit( score )
+		self.score_added.emit( score)
 
 	def subtract_score( self, score: int ):
 		self.score -= score
-		self.score_subtracted.emit( score )
+		self.score_subtracted.emit( score)
 
 
 player_1 = Player( "Lukas", QColor( "#FFE014" ) )
-player_2 = Player( "Eileen", QColor( "#2c7822" ) )
+player_2 = Player( "Seb", QColor( "#B81DB2" ) )
 remaining_points_color = QColor( "#000000" )
 
 
@@ -66,7 +75,12 @@ class TitleText( QGraphicsView ):
 	def __init__( self ):
 		self.scene = QGraphicsScene()
 		QGraphicsView.__init__( self, self.scene )
-		self.pix_map_item = QGraphicsPixmapItem( QPixmap( "TitleText.png" ) )
+		
+		# Get absolute path to image
+		script_dir = os.path.dirname(os.path.abspath(__file__))
+		image_path = os.path.join(script_dir, "TitleText.png")
+		
+		self.pix_map_item = QGraphicsPixmapItem( QPixmap( image_path ) )
 		self.pix_map_item.scale()
 		self.scene.addItem( self.pix_map_item )
 		self.size = self.pix_map_item.pixmap().size()
@@ -185,14 +199,19 @@ class ScoreButtonContainer( QWidget ):
 		self.player = player
 		opponent = player_1 if player == player_2 else player_2
 		opponent.score_added.connect( self.handle_opponent )
+		opponent.score_subtracted.connect( self.handle_opponent )
 
-	def handle_opponent( self, score: int ):
+	def handle_opponent( self, score: int):
 		button = self.layout.itemAt( score - 1 ).widget()
-
 		if button.state == 1:
 			button.player.subtract_score( score )
+			button.change_state( -1 )
+		elif button.state == -1:
+			button.change_state( 0 )
+		elif button.state == 0:
+			button.change_state( -1 )
 
-		button.change_state( -1 )
+		
 
 	@staticmethod
 	def make_button_callback( button, player: Player, score: int ):
@@ -200,7 +219,9 @@ class ScoreButtonContainer( QWidget ):
 			if button.state == 0 or button.state == -1:
 				player.add_score( score )
 				button.change_state( 1 )
-
+			elif button.state == 1:
+				player.subtract_score( score )
+				button.change_state( 0 )
 		return callback
 
 

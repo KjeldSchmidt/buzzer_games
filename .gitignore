@@ -4,3 +4,5 @@
 /venv/*
 *.wav
 *.avi
+*.
+.vscode/*
