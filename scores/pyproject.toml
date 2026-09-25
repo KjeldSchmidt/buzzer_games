@@ -1,0 +1,17 @@
+[project]
+name = "scores"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pyqt5>=5.15.11",
+    "pyqtchart>=5.15.7",
+]
+
+# Newer pyqt5-qt5 / pyqtchart-qt5 dropped Windows wheels; pin the last ones that ship them.
+[tool.uv]
+constraint-dependencies = [
+    "pyqt5-qt5==5.15.2",
+    "pyqtchart-qt5==5.15.2",
+]

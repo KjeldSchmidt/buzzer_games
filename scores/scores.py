@@ -1,6 +1,6 @@
-from PyQt5.QtCore import pyqtSignal, QObject, Qt
+from PyQt5.QtCore import pyqtSignal, QObject, Qt, QRectF
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QGridLayout, QLabel, \
-	QGraphicsScene, QGraphicsPixmapItem, QGraphicsView
+	QGraphicsScene, QGraphicsPixmapItem, QGraphicsView, QFrame
 from PyQt5.QtChart import QChart, QChartView, QPieSeries, QPieSlice
 from PyQt5.QtGui import QPainter, QColor, QBrush, QPalette, QFont, QPixmap
 
@@ -16,6 +16,7 @@ def main():
 class Player( QObject ):
 	score_added = pyqtSignal( int )
 	score_subtracted = pyqtSignal( int )
+	score_reset = pyqtSignal( int )
 
 	def __init__( self, name, color ):
 		QObject.__init__( self )
@@ -33,7 +34,7 @@ class Player( QObject ):
 
 
 player_1 = Player( "Lukas", QColor( "#FFE014" ) )
-player_2 = Player( "Eileen", QColor( "#2c7822" ) )
+player_2 = Player( "Ulf", QColor( "#4287f5" ) )
 remaining_points_color = QColor( "#000000" )
 
 
@@ -61,16 +62,27 @@ class MainWindow( QWidget ):
 
 		self.setLayout( self.layout )
 
+	def keyPressEvent( self, event ):
+		if event.key() == Qt.Key_F:
+			self.showFullScreen()
+		elif event.key() == Qt.Key_Escape:
+			self.showMaximized()
+		else:
+			QWidget.keyPressEvent( self, event )
+
 
 class TitleText( QGraphicsView ):
 	def __init__( self ):
 		self.scene = QGraphicsScene()
 		QGraphicsView.__init__( self, self.scene )
-		self.pix_map_item = QGraphicsPixmapItem( QPixmap( "TitleText.png" ) )
-		self.pix_map_item.scale()
+		pixmap = QPixmap( "TitleText.png" )
+		self.pix_map_item = QGraphicsPixmapItem( pixmap )
 		self.scene.addItem( self.pix_map_item )
-		self.size = self.pix_map_item.pixmap().size()
-		self.setMaximumSize( self.size )
+		self.scene.setSceneRect( QRectF( pixmap.rect() ) )
+		self.setFrameShape( QFrame.NoFrame )
+		self.setHorizontalScrollBarPolicy( Qt.ScrollBarAlwaysOff )
+		self.setVerticalScrollBarPolicy( Qt.ScrollBarAlwaysOff )
+		self.setFixedSize( pixmap.size() )
 
 
 class ScoreCake( QWidget ):
@@ -185,6 +197,8 @@ class ScoreButtonContainer( QWidget ):
 		self.player = player
 		opponent = player_1 if player == player_2 else player_2
 		opponent.score_added.connect( self.handle_opponent )
+		opponent.score_reset.connect( self.handle_opponent_reset )
+		self.player.score_reset.connect( self.handle_own_reset )
 
 	def handle_opponent( self, score: int ):
 		button = self.layout.itemAt( score - 1 ).widget()
@@ -193,6 +207,16 @@ class ScoreButtonContainer( QWidget ):
 			button.player.subtract_score( score )
 
 		button.change_state( -1 )
+
+	def handle_own_reset( self, score: int ):
+		button = self.layout.itemAt( score - 1 ).widget()
+		if button.state == 1:
+			button.change_state( 0 )
+
+	def handle_opponent_reset( self, score: int ):
+		button = self.layout.itemAt( score - 1 ).widget()
+		if button.state == -1:
+			button.change_state( 0 )
 
 	@staticmethod
 	def make_button_callback( button, player: Player, score: int ):
@@ -211,11 +235,22 @@ class ScoreButton( QPushButton ):
 		self.state = 0
 		self.player = player
 
+	def mousePressEvent( self, event ):
+		if event.button() == Qt.RightButton and self.state == 1:
+			self.player.subtract_score( self.num )
+			self.player.score_reset.emit( self.num )
+		elif event.button() == Qt.RightButton and self.state == -1:
+			opponent = player_1 if self.player == player_2 else player_2
+			opponent.subtract_score( self.num )
+			opponent.score_reset.emit( self.num )
+		else:
+			QPushButton.mousePressEvent( self, event )
+
 	def change_state( self, new_state: int ):
 		self.state = new_state
 		self.setProperty( "state", str( self.state ) )
 		self.style().unpolish( self )
-		self.ensurePolished()
+		self.style().polish( self )
 
 
 main()
